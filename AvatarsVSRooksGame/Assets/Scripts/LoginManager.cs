@@ -3,86 +3,74 @@ using TMPro;
 using UnityEditor.SearchService;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using Firebase.Extensions;
+using Firebase.Auth;
 
 public class LoginManager : MonoBehaviour
 {
     [SerializeField] private TMP_InputField usernameInput;
     [SerializeField] private TMP_InputField passwordInput;
     [SerializeField] private TMP_Text errorText;
+    private FirebaseAuth auth;
+
+    void Start()
+    {
+        StartCoroutine(WaitForFirebaseInitialization());
+    }
+
+    private System.Collections.IEnumerator WaitForFirebaseInitialization()
+    {
+        while (!FirebaseInitializer.IsFirebaseInitialized)
+        {
+            Debug.Log("Waiting for Firebase to initialize...");
+            yield return null;
+        }
+
+        auth = FirebaseAuth.DefaultInstance;
+        errorText.text = "";
+        Debug.Log("Firebase Auth initialized.");
+    }
 
     /// <summary>
     /// Validates the user credentials.
     /// </summary>
     public void OnSubmitButtonPressed()
     {
+        if (auth == null)
+        {
+            Debug.LogError("Firebase Auth is not initialized.");
+            errorText.text = "Error! Firebase not initialized.";
+            return;
+        }
+
         string username = usernameInput.text;
         string password = passwordInput.text;
 
-        Debug.Log("Username: " + username);
-        Debug.Log("Password: " + password);
-
-
-        if (ValidateCredentials(username, password))
+        if (string.IsNullOrEmpty(username) && string.IsNullOrEmpty(password))
         {
-            Debug.Log("Login successful!");
-            // Proceed to the next scene or functionality
-            SceneManager.LoadScene("LoggedIn");
+            errorText.text = "Error! Please fill in all fields.";
+            return;
         }
-        else
+
+        auth.SignInWithEmailAndPasswordAsync(username, password).ContinueWithOnMainThread(task =>
         {
-            if (IsInputFieldEmpty(usernameInput) || IsInputFieldEmpty(passwordInput))
+            if (task.IsCompleted && !task.IsFaulted && !task.IsCanceled)
             {
-                Debug.Log("Please fill in all fields.");
-                // Show error message to the user
-                errorText.text = "Error! Please fill in all fields.";
+                Debug.Log("User signed in successfully.");
+                SceneManager.LoadScene("LoggedIn");
             }
             else
             {
-                Debug.Log("Invalid username or password.");
-                // Show error message to the user
+                Debug.LogError($"Sign-in failed: {task.Exception}");
                 errorText.text = "Error! Invalid username or password.";
-                OnClearButtonPressed();
+                clearInputFields();
             }
-        }
+        });
     }
 
-    /// <summary>
-    /// Validates the provided username and password.
-    /// </summary>
-    private bool ValidateCredentials(string username, string password)
-    {
-        if (users.ContainsKey(username))
-        {
-            string hashedInput = PasswordHasher.HashPassword(password);
-            return users[username] == hashedInput;
-        }
-        return false;
-    }
-
-
-    /// <summary>
-    /// Checks if the input field is empty or contains only whitespace.
-    /// </summary>
-    private bool IsInputFieldEmpty(TMP_InputField inputField)
-    {
-        return string.IsNullOrWhiteSpace(inputField.text);
-    }
-
-    /// <summary>
-    /// Clears the input fields.
-    /// </summary>
-    public void OnClearButtonPressed()
+    private void clearInputFields()
     {
         usernameInput.text = "";
         passwordInput.text = "";
     }
-
-    /// <summary>    /// A simple in-memory user database for demonstration purposes.
-    /// </summary>
-    private Dictionary<string, string> users = new Dictionary<string, string>()
-    {
-        { "user1", PasswordHasher.HashPassword("pass1") },
-        { "user2", PasswordHasher.HashPassword("pass2") },
-        { "admin", PasswordHasher.HashPassword("password123") }
-    };
 }
