@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEditor.SearchService;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class LoginManager : MonoBehaviour
 {
@@ -50,9 +51,14 @@ public class LoginManager : MonoBehaviour
     /// </summary>
     private bool ValidateCredentials(string username, string password)
     {
-        // Simple validation logic (for demonstration purposes)
-        return username == "admin" && password == "password123";
+        if (users.ContainsKey(username))
+        {
+            string hashedInput = PasswordHasher.HashPassword(password);
+            return users[username] == hashedInput;
+        }
+        return false;
     }
+
 
     /// <summary>
     /// Checks if the input field is empty or contains only whitespace.
@@ -70,4 +76,13 @@ public class LoginManager : MonoBehaviour
         usernameInput.text = "";
         passwordInput.text = "";
     }
+
+    /// <summary>    /// A simple in-memory user database for demonstration purposes.
+    /// </summary>
+    private Dictionary<string, string> users = new Dictionary<string, string>()
+    {
+        { "user1", PasswordHasher.HashPassword("pass1") },
+        { "user2", PasswordHasher.HashPassword("pass2") },
+        { "admin", PasswordHasher.HashPassword("password123") }
+    };
 }
