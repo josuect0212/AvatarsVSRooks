@@ -125,6 +125,45 @@ public class ThemeManager : MonoBehaviour
         SavePreferences();
     }
 
+    // Establecer color personalizado desde gradiente
+    public void SetCustomFavoriteColor(Color customColor)
+    {
+        // Guardar el color personalizado en el primer slot o crear uno nuevo
+        if (availableColors.Length > 0)
+        {
+            availableColors[0] = customColor;
+            currentColorIndex = 0;
+        }
+        ApplyButtonColors();
+        SaveCustomColor(customColor);
+    }
+
+    private void SaveCustomColor(Color color)
+    {
+        PlayerPrefs.SetFloat("CustomColorR", color.r);
+        PlayerPrefs.SetFloat("CustomColorG", color.g);
+        PlayerPrefs.SetFloat("CustomColorB", color.b);
+        PlayerPrefs.SetFloat("CustomColorA", color.a);
+        PlayerPrefs.SetInt("HasCustomColor", 1);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadCustomColor()
+    {
+        if (PlayerPrefs.GetInt("HasCustomColor", 0) == 1)
+        {
+            float r = PlayerPrefs.GetFloat("CustomColorR", 1f);
+            float g = PlayerPrefs.GetFloat("CustomColorG", 1f);
+            float b = PlayerPrefs.GetFloat("CustomColorB", 1f);
+            float a = PlayerPrefs.GetFloat("CustomColorA", 1f);
+            
+            if (availableColors.Length > 0)
+            {
+                availableColors[0] = new Color(r, g, b, a);
+            }
+        }
+    }
+
     // Aplicar tema completo
     private void ApplyTheme()
     {
@@ -182,6 +221,7 @@ public class ThemeManager : MonoBehaviour
     {
         isDarkMode = PlayerPrefs.GetInt("DarkMode", 0) == 1;
         currentColorIndex = PlayerPrefs.GetInt("FavoriteColorIndex", 0);
+        LoadCustomColor();
     }
 
     // Getters
