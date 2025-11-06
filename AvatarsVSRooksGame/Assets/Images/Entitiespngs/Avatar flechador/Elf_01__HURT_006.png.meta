@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Elf_01__HURT_006_0: 74567505489118458
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

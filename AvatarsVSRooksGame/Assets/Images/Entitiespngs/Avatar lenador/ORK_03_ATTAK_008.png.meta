@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ORK_03_ATTAK_008_0: -1906364139432261085
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

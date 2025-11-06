@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ORK_03_JUMP_003_0: 6390659817518972572
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

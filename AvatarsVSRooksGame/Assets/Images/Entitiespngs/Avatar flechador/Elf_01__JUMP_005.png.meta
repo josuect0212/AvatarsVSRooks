@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Elf_01__JUMP_005_0: -2272595788063308729
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      buyCrookTemplate_0: 7794669415387674465
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Sand6_3_no_shadow_0: 7055065689666178626
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
