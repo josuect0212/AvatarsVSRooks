@@ -2925,9 +2925,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11500000, guid: c146974051f9ac948941f2caa91844f9, type: 3}
+      - m_Target: {fileID: 607699087}
         m_TargetAssemblyTypeName: LoginManager, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: OnSubmitButtonPressed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
