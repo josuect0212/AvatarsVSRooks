@@ -19,6 +19,7 @@ public class AvatarSpawner : MonoBehaviour
                     avatar.Spawner = Random.Range(0, transform.childCount);
                 }
                 GameObject avatarInstance = Instantiate(avatarPrefabs[(int)avatar.avatarType], transform.GetChild(avatar.Spawner).transform);
+                transform.GetChild(avatar.Spawner).GetComponent<SpawnPoint>().avatars.Add(avatarInstance);
                 avatar.isSpawned = true;
             }
         }

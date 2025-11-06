@@ -23,4 +23,17 @@ public class AvatarController : MonoBehaviour
             isStopped = true;
         }
     }
+
+    public void TakeDamage(int damage)
+    {
+        if (Health - damage <= 0)
+        {
+            transform.parent.GetComponent<SpawnPoint>().avatars.Remove(this.gameObject);
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            Health -= damage;
+        }
+    }
 }

@@ -6,6 +6,7 @@ public class RookContainer : MonoBehaviour
     public bool filled;
     public GameManager gameManager;
     public Image backgroundImage;
+    public SpawnPoint spawnPoint;
 
     void Start() {
         gameManager = GameManager.instance;

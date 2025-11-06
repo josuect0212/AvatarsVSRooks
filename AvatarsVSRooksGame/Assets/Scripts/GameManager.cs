@@ -16,11 +16,10 @@ public class GameManager : MonoBehaviour
     {
         if (draggingRook != null && currentContainer != null)
         {
-            //not sure if transform
-            Instantiate(draggingRook.GetComponent<RookDrag>().card.rook_Game, currentContainer.transform);
+            GameObject objectGame = Instantiate(draggingRook.GetComponent<RookDrag>().card.rook_Game, currentContainer.transform);
+            objectGame.GetComponent<RookController>().avatars = currentContainer.GetComponent<RookContainer>().spawnPoint.avatars;
             currentContainer.GetComponent<RookContainer>().filled = true;
 
         }
-
     }
 }
