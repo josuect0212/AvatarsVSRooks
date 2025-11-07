@@ -12,14 +12,28 @@ public class GameManager : MonoBehaviour
         instance = this;
     }
 
-    public void PlaceRook()
+    public bool PlaceRook()
+{
+    if (draggingRook != null && currentContainer != null)
     {
-        if (draggingRook != null && currentContainer != null)
+        RookContainer container = currentContainer.GetComponent<RookContainer>();
+        
+        if (container != null && !container.filled)
         {
-            GameObject objectGame = Instantiate(draggingRook.GetComponent<RookDrag>().card.rook_Game, currentContainer.transform);
-            objectGame.GetComponent<RookController>().avatars = currentContainer.GetComponent<RookContainer>().spawnPoint.avatars;
-            currentContainer.GetComponent<RookContainer>().filled = true;
-
+            GameObject objectGame = Instantiate(
+                draggingRook.GetComponent<RookDrag>().card.rook_Game, 
+                currentContainer.transform
+            );
+            
+            objectGame.GetComponent<RookController>().avatars = 
+                container.spawnPoint.avatars;
+            
+            container.filled = true;
+            
+            return true; // Torre colocada exitosamente
         }
     }
+    
+    return false; // No se pudo colocar
+}
 }

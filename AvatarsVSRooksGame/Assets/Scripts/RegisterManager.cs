@@ -130,7 +130,7 @@ public class RegisterManager : MonoBehaviour
                 return;
             }
 
-            FirebaseUser newUser = task.Result;
+            FirebaseUser newUser = task.Result.User;
             Debug.LogFormat("Usuario creado: {0} ({1})", newUser.Email, newUser.UserId);
 
             // guardar datos en Realtime DB
