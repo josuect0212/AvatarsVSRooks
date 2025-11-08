@@ -140,4 +140,5 @@ MonoBehaviour:
   toAttack: {fileID: 0}
   attackCooldown: 10
   damage: 100
+  health: 5
   isAttacking: 0

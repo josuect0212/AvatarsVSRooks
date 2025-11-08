@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AvatarController : MonoBehaviour
 {
-    public int Health;
-    public int Damage;
+    public int health;
+    public int damage;
+    public float attackCooldown;
     public float movementSpeed;
     private bool isStopped;
+
     void Update()
     {
         if (!isStopped)
@@ -20,20 +23,36 @@ public class AvatarController : MonoBehaviour
     {
         if (collision.gameObject.layer == 10)
         {
+            StartCoroutine(Attack(collision));
             isStopped = true;
         }
     }
 
+    IEnumerator Attack(Collider2D collision)
+    {
+        if (collision == null)
+        {
+            isStopped = false;
+        }
+        else
+        {
+            collision.gameObject.GetComponent<RookController>().TakeDamage(damage);
+            yield return new WaitForSeconds(attackCooldown);
+            StartCoroutine(Attack(collision));
+        }
+
+    }
+
     public void TakeDamage(int damage)
     {
-        if (Health - damage <= 0)
+        if (health - damage <= 0)
         {
             transform.parent.GetComponent<SpawnPoint>().avatars.Remove(this.gameObject);
             Destroy(this.gameObject);
         }
         else
         {
-            Health -= damage;
+            health -= damage;
         }
     }
 }

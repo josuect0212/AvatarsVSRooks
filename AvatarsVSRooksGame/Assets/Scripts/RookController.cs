@@ -9,6 +9,7 @@ public class RookController : MonoBehaviour
     public float attackCooldown;
     private float attackTime;
     public int damage;
+    public int health;
     public bool isAttacking;
 
     private void Update()
@@ -31,6 +32,17 @@ public class RookController : MonoBehaviour
                 fireInstance.GetComponent<Fire>().damage = damage;
                 attackTime = Time.time + attackCooldown;
             }
+        }
+    }
+    public void TakeDamage(int damage)
+    {
+        if (health - damage <= 0)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            health -= damage;
         }
     }
 }
