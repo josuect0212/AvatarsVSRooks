@@ -1167,21 +1167,25 @@ MonoBehaviour:
     Spawner: 0
     randomSpawn: 1
     isSpawned: 0
+    respawnCooldown: 0
   - spawnTime: 3
     avatarType: 1
     Spawner: 1
     randomSpawn: 1
     isSpawned: 0
+    respawnCooldown: 0
   - spawnTime: 5
     avatarType: 2
     Spawner: 2
     randomSpawn: 1
     isSpawned: 0
+    respawnCooldown: 0
   - spawnTime: 9
     avatarType: 3
     Spawner: 3
     randomSpawn: 1
     isSpawned: 0
+    respawnCooldown: 0
 --- !u!1001 &489743799
 PrefabInstance:
   m_ObjectHideFlags: 0
