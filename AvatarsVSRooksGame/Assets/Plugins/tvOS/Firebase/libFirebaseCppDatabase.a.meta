@@ -2,6 +2,9 @@ fileFormatVersion: 2
 guid: 67b70764d5594ee5ae00315a1027f697
 labels:
 - gvh
+<<<<<<< HEAD
+- gvh_version-13.4.0
+=======
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 - gvh_version-13.4.0
@@ -11,6 +14,7 @@ labels:
 =======
 - gvh_version-13.5.0
 >>>>>>> Stashed changes
+>>>>>>> main
 - gvhp_exportpath-Plugins/tvOS/Firebase/libFirebaseCppDatabase.a
 timeCreated: 1480838400
 PluginImporter:

@@ -14,7 +14,8 @@
 
 # Firebase SDK plugins
 /[Aa]ssets/Firebase/Plugins/
-
+AvatarsVSRooksGame/Assets/Firebase/Plugins/x86_64/*.bundle
+AvatarsVSRooksGame/Assets/Firebase/Plugins/x86_64/*.so
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1
 *.blend1.meta

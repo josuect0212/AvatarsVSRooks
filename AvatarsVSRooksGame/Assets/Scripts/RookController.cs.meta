@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 811e8eaa769a5d44781816dd504ab1b0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - fire: {instanceID: 0}
+  - toAttack: {instanceID: 0}
+  - currentRookContainer: {fileID: 220740882899782863, guid: db7608576f8cfd44680f2d1a4d10b6b9, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
