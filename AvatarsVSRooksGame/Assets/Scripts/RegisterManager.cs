@@ -1,25 +1,16 @@
-<<<<<<< Updated upstream
-=======
 using System;
 using System.Collections;
 using System.Collections.Generic;
->>>>>>> Stashed changes
 using UnityEngine;
+using TMPro;
+using Firebase;
+using Firebase.Auth;
+using Firebase.Database;
+using Firebase.Extensions;
+using UnityEngine.SceneManagement;
 
 public class RegisterManager : MonoBehaviour
 {
-<<<<<<< Updated upstream
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-=======
     [Header("Inputs (assign in Inspector)")]
     [SerializeField] private TMP_InputField inputEmail;
     [SerializeField] private TMP_InputField inputUsername;
@@ -281,6 +272,5 @@ public class RegisterManager : MonoBehaviour
     public void OnCancelPressed()
     {
         SceneManager.LoadScene("Login");
->>>>>>> Stashed changes
     }
 }
