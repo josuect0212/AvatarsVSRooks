@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RookController : MonoBehaviour
 {
@@ -11,22 +12,23 @@ public class RookController : MonoBehaviour
     public int damage;
     public int health;
     public bool isAttacking;
+    public RookContainer currentRookContainer;
 
     private void Update()
-    {
-        if (avatars.Count > 0 && !isAttacking)
+   {
+        // Clean nulls from avatar list (if any were destroyed)
+        avatars.RemoveAll(a => a == null);
+
+        // Reset attack target if needed
+        if (toAttack == null || !avatars.Contains(toAttack))
         {
-            isAttacking = true;
-            toAttack = avatars[0];
-        }
-        else if (avatars.Count == 0 && isAttacking)
-        {
-            isAttacking = false;
+            toAttack = avatars.Count > 0 ? avatars[0] : null;
         }
 
+        // If there’s a valid target, shoot periodically
         if (toAttack != null)
         {
-            if (attackTime <= Time.time)
+            if (Time.time >= attackTime)
             {
                 GameObject fireInstance = Instantiate(fire, transform);
                 fireInstance.GetComponent<Fire>().damage = damage;
@@ -38,7 +40,11 @@ public class RookController : MonoBehaviour
     {
         if (health - damage <= 0)
         {
-            Destroy(this.gameObject);
+            if (currentRookContainer != null)
+            {
+                currentRookContainer.filled = false; 
+            }
+            Destroy(this.gameObject);          
         }
         else
         {

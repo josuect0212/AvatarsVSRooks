@@ -48,11 +48,19 @@ public class AvatarController : MonoBehaviour
         if (health - damage <= 0)
         {
             transform.parent.GetComponent<SpawnPoint>().avatars.Remove(this.gameObject);
+            FindObjectOfType<AvatarSpawner>().OnAvatarDestroyed(gameObject);
             Destroy(this.gameObject);
         }
         else
         {
             health -= damage;
+        }
+    }
+    private void OnDestroy(){
+        AvatarSpawner spawner = FindObjectOfType<AvatarSpawner>();
+        if (spawner != null)
+        {
+            spawner.OnAvatarDestroyed(gameObject);
         }
     }
 }

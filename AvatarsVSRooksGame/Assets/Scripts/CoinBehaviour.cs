@@ -54,7 +54,7 @@ public class CoinBehavior : MonoBehaviour, IPointerClickHandler
             StartCoroutine(LifetimeRoutine());
         }
         
-        Debug.Log($"Moneda de {coinValue} creada en posición {startPosition}");
+        //Debug.Log($"Moneda de {coinValue} creada en posición {startPosition}");
     }
     
     void Update()
@@ -112,11 +112,11 @@ public class CoinBehavior : MonoBehaviour, IPointerClickHandler
         if (CoinManager.Instance != null)
         {
             CoinManager.Instance.AddCoins(coinValue);
-            Debug.Log($"Moneda de {coinValue} recolectada! Total: {CoinManager.Instance.GetTotalCoins()}");
+            //Debug.Log($"Moneda de {coinValue} recolectada! Total: {CoinManager.Instance.GetTotalCoins()}");
         }
         else
         {
-            Debug.LogWarning("CoinManager.Instance es null!");
+            //Debug.LogWarning("CoinManager.Instance es null!");
         }
         
         // Iniciar animación de recolección

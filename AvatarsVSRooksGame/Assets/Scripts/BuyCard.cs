@@ -91,7 +91,7 @@ public class BuyCard : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointe
         {
             if (CoinManager.Instance.SpendCoins(cardCost))
             {
-                Debug.Log($"Torre comprada por {cardCost} monedas. Monedas restantes: {CoinManager.Instance.GetTotalCoins()}");
+                //Debug.Log($"Torre comprada por {cardCost} monedas. Monedas restantes: {CoinManager.Instance.GetTotalCoins()}");
             }
         }
         

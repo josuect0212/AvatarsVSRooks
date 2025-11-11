@@ -32,7 +32,7 @@ public class CoinSpawner : MonoBehaviour
         {
             RookContainer[] containers = containerMatrixParent.GetComponentsInChildren<RookContainer>();
             allContainers.AddRange(containers);
-            Debug.Log($"CoinSpawner: Encontrados {allContainers.Count} RookContainers");
+            //Debug.Log($"CoinSpawner: Encontrados {allContainers.Count} RookContainers");
         }
         else
         {
