@@ -1,2 +1,1 @@
-
-[Boceto control.pdf](https://github.com/user-attachments/files/23468873/Boceto.control.pdf)
+<img width="679" height="944" alt="image" src="https://github.com/user-attachments/assets/aef3c010-baec-4148-aad1-ab37bc067580" />
