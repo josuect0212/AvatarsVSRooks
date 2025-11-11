@@ -1,11 +1,13 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Firebase;
 using Firebase.Extensions;
 using Firebase.Auth;
+using Firebase.Database;
 
 public class FirebaseInitializer : MonoBehaviour
 {
     public static bool IsFirebaseInitialized { get; private set; } = false;
+    public static FirebaseApp app;
 
     void Awake()
     {
@@ -14,8 +16,13 @@ public class FirebaseInitializer : MonoBehaviour
             var dependencyStatus = task.Result;
             if (dependencyStatus == DependencyStatus.Available)
             {
+                app = FirebaseApp.DefaultInstance;
+
+                
+                app.Options.DatabaseUrl = new System.Uri("https://avatarsvsrooks-default-rtdb.firebaseio.com/");
+
                 IsFirebaseInitialized = true;
-                Debug.Log("Firebase is ready to use.");
+                Debug.Log("Firebase is ready to use with Realtime Database.");
             }
             else
             {

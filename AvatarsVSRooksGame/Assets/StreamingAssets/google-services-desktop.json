@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "762581431157",
+    "firebase_url": "https://avatarsvsrooks-default-rtdb.firebaseio.com",
     "project_id": "avatarsvsrooks",
     "storage_bucket": "avatarsvsrooks.firebasestorage.app"
   },
