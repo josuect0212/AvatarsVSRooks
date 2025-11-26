@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6328443514150996386}
   - component: {fileID: 2953443404442199336}
   m_Layer: 10
-  m_Name: Rook_Game
+  m_Name: SandRook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -135,10 +135,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 811e8eaa769a5d44781816dd504ab1b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fire: {fileID: 5715733165396108814, guid: f279b4c95627fde4d8c2db28570f875c, type: 3}
+  rookType: 0
+  fire: {fileID: 5715733165396108814, guid: 09599b5ae83465f64903faafebf3b5b7, type: 3}
   avatars: []
   toAttack: {fileID: 0}
   attackCooldown: 10
   damage: 100
   health: 5
   isAttacking: 0
+  currentRookContainer: {fileID: 0}

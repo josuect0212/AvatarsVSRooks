@@ -13,7 +13,6 @@ public class RookContainer : MonoBehaviour
     }
 
     public void OnTriggerEnter2D(Collider2D collision) {
-
         if (gameManager.draggingRook != null && filled == false) {
             gameManager.currentContainer = this.gameObject;
             backgroundImage.enabled = true;
@@ -25,7 +24,6 @@ public class RookContainer : MonoBehaviour
         backgroundImage.enabled = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
     
