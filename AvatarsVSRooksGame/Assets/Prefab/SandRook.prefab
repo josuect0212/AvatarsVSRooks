@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 565218819309565837}
   - component: {fileID: 6328443514150996386}
   - component: {fileID: 2953443404442199336}
+  - component: {fileID: -8459385800863117641}
   m_Layer: 10
   m_Name: SandRook
   m_TagString: Untagged
@@ -141,6 +142,21 @@ MonoBehaviour:
   toAttack: {fileID: 0}
   attackCooldown: 10
   damage: 100
-  health: 5
+  maxHealth: 0
+  currentHealth: 0
   isAttacking: 0
   currentRookContainer: {fileID: 0}
+  healthBar: {fileID: 0}
+  healthBarOffset: {x: 0, y: 1, z: 0}
+--- !u!114 &-8459385800863117641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5337867569792624027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adfbd499285484c20b3c3f3858fdf050, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      buyFireRook_0: 2083786735879261225
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
