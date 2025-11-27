@@ -141,6 +141,9 @@ MonoBehaviour:
   toAttack: {fileID: 0}
   attackCooldown: 10
   damage: 100
-  health: 5
+  maxHealth: 0
+  currentHealth: 0
   isAttacking: 0
   currentRookContainer: {fileID: 0}
+  healthBarPrefab: {fileID: 2748119211720421828, guid: 213237efb4967591d812f922c0897460, type: 3}
+  healthBarOffset: {x: 0, y: 30, z: 0}

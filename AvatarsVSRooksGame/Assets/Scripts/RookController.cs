@@ -20,10 +20,10 @@ public class RookController : MonoBehaviour
     public RookContainer currentRookContainer;
     
     [Header("Health Bar")]
-    public Slider healthBar;
-    public Vector3 healthBarOffset = new Vector3(0, 1, 0);
-    
-    private Canvas healthBarCanvas;
+    public GameObject healthBarPrefab; // Prefab del Canvas con la barra de vida
+    private GameObject healthBarInstance;
+    private Image healthBarFill;
+    public Vector3 healthBarOffset = new Vector3(0, 30f, 0); // Offset en píxeles UI
 
     private void Start()
     {
@@ -52,10 +52,7 @@ public class RookController : MonoBehaviour
         }
         
         // Actualizar posición de la barra de vida
-        if (healthBarCanvas != null)
-        {
-            healthBarCanvas.transform.position = transform.position + healthBarOffset;
-        }
+        UpdateHealthBarPosition();
     }
 
     private void ApplyRookStats()
@@ -88,44 +85,105 @@ public class RookController : MonoBehaviour
 
     void SetupHealthBar()
     {
-        if (healthBar == null) return;
+        if (healthBarPrefab == null) 
+        {
+            Debug.LogWarning($"[{rookType}] No hay healthBarPrefab asignado");
+            return;
+        }
         
-        // Crear canvas para la barra de vida
-        GameObject canvasObj = new GameObject("HealthBarCanvas");
-        canvasObj.transform.SetParent(transform);
-        healthBarCanvas = canvasObj.AddComponent<Canvas>();
-        healthBarCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        // Instanciar la barra de vida como hijo del mismo Canvas que el Rook
+        Canvas parentCanvas = GetComponentInParent<Canvas>();
+        if (parentCanvas != null)
+        {
+            healthBarInstance = Instantiate(healthBarPrefab, parentCanvas.transform);
+        }
+        else
+        {
+            healthBarInstance = Instantiate(healthBarPrefab);
+        }
         
-        CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
-        scaler.dynamicPixelsPerUnit = 10;
+        // Asegurar que la escala sea correcta
+        healthBarInstance.transform.localScale = Vector3.one;
         
-        // Configurar el slider
-        healthBar.transform.SetParent(canvasObj.transform);
-        RectTransform rect = healthBar.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(1, 0.2f);
-        rect.localScale = Vector3.one * 0.01f;
+        // Buscar la imagen "Fill" en los hijos
+        Transform fillTransform = healthBarInstance.transform.Find("AvatarHealthBar/Fill Area/Fill");
+        if (fillTransform != null)
+        {
+            healthBarFill = fillTransform.GetComponent<Image>();
+        }
         
-        healthBar.maxValue = maxHealth;
-        healthBar.value = currentHealth;
+        // Si no lo encontramos con el path exacto, buscar por nombre
+        if (healthBarFill == null)
+        {
+            Image[] allImages = healthBarInstance.GetComponentsInChildren<Image>();
+            foreach (Image img in allImages)
+            {
+                if (img.gameObject.name == "Fill")
+                {
+                    healthBarFill = img;
+                    break;
+                }
+            }
+        }
+        
+        if (healthBarFill != null)
+        {
+            // Configurar la imagen para usar Fill
+            healthBarFill.type = Image.Type.Filled;
+            healthBarFill.fillMethod = Image.FillMethod.Horizontal;
+            healthBarFill.fillOrigin = 0; // Izquierda a derecha
+            healthBarFill.fillAmount = 1f; // 100% al inicio
+            
+            Debug.Log($"[{rookType}] ✅ Barra de vida configurada");
+        }
+        else
+        {
+            Debug.LogError($"[{rookType}] ❌ No se encontró Image 'Fill' en el prefab");
+        }
+    }
+
+    void UpdateHealthBarPosition()
+    {
+        if (healthBarInstance == null) return;
+        
+        // La barra de vida sigue la posición del Rook con un offset
+        healthBarInstance.transform.position = transform.position + healthBarOffset;
     }
 
     public void TakeDamage(int damageAmount)
     {
         currentHealth -= damageAmount;
         
-        // Actualizar barra de vida
-        if (healthBar != null)
+        // Actualizar barra de vida usando fillAmount
+        if (healthBarFill != null)
         {
-            healthBar.value = currentHealth;
+            healthBarFill.fillAmount = (float)currentHealth / (float)maxHealth;
         }
+        
+        Debug.Log($"[{rookType}] 💔 -{damageAmount} HP ({currentHealth}/{maxHealth})");
         
         if (currentHealth <= 0)
         {
-            if (currentRookContainer != null)
-            {
-                currentRookContainer.filled = false; 
-            }
-            Destroy(this.gameObject);          
+            Die();
         }
+    }
+
+    void Die()
+    {
+        Debug.Log($"[{rookType}] 💀 Destruido");
+        
+        // Destruir la barra de vida
+        if (healthBarInstance != null)
+        {
+            Destroy(healthBarInstance);
+        }
+        
+        // Liberar el contenedor
+        if (currentRookContainer != null)
+        {
+            currentRookContainer.filled = false; 
+        }
+        
+        Destroy(this.gameObject);
     }
 }

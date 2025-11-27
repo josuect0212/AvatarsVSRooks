@@ -146,7 +146,7 @@ MonoBehaviour:
   currentHealth: 0
   isAttacking: 0
   currentRookContainer: {fileID: 0}
-  healthBar: {fileID: 0}
+  healthBarPrefab: {fileID: 2748119211720421828, guid: 213237efb4967591d812f922c0897460, type: 3}
   healthBarOffset: {x: 0, y: 1, z: 0}
 --- !u!114 &-8459385800863117641
 MonoBehaviour:

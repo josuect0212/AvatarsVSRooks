@@ -56,10 +56,10 @@ MonoBehaviour:
   movementSpeed: 12
   isRangedAttack: 1
   attackRange: 1000
-  detectionAngle: 360
-  targetClosest: 1
+  columnTolerance: 30
+  moveWhileAttacking: 0
   projectilePrefab: {fileID: 5073781968711670903, guid: ce1f365db216fe04ba7fd239099991ef, type: 3}
-  healthBar: {fileID: 7242344837097592807}
+  healthBarPrefab: {fileID: 2748119211720421828, guid: 213237efb4967591d812f922c0897460, type: 3}
   healthBarOffset: {x: 0, y: 1, z: 0}
   coinReward: 75
 --- !u!50 &8869463214816820592

@@ -27,8 +27,10 @@ public class AvatarController : MonoBehaviour
     public GameObject projectilePrefab;
     
     [Header("Health Bar")]
-    public Slider healthBar;
-    public Vector3 healthBarOffset = new Vector3(0, 1.5f, 0);
+    public GameObject healthBarPrefab; // Prefab del Canvas con la barra de vida
+    private GameObject healthBarInstance;
+    private Image healthBarFill; // Usamos Image en vez de Slider
+    public Vector3 healthBarOffset = new Vector3(0, 30f, 0); // Offset en píxeles UI
     
     [Header("Coin Reward")]
     public int coinReward = 75;
@@ -57,30 +59,45 @@ public class AvatarController : MonoBehaviour
     void Update()
     {
         // ============ VERIFICAR SI EL OBJETIVO SIGUE VIVO ============
-        // IMPORTANTE: En Unity, cuando un objeto se destruye, la referencia no es null inmediatamente
-        // Hay que usar el operador == que Unity sobrecarga para detectar objetos destruidos
-        if (targetRook != null && (targetRook == null || targetRook.gameObject == null || !targetRook.gameObject.activeInHierarchy))
+        // Usar el operador == de Unity que detecta objetos destruidos
+        bool targetDestroyed = false;
+        if (!ReferenceEquals(targetRook, null))
         {
-            Debug.Log($"[{avatarType}] 💀 Objetivo destruido, buscando nuevo...");
+            // targetRook tiene una referencia, pero ¿el objeto fue destruido?
+            if (targetRook == null) // El operador == de Unity retorna true si fue destruido
+            {
+                targetDestroyed = true;
+            }
+        }
+        
+        if (targetDestroyed)
+        {
+            Debug.Log($"[{avatarType}] 💀 Objetivo destruido, continuando movimiento...");
             targetRook = null;
             isStopped = false;
         }
         
         // ============ BUSCAR OBJETIVOS ============
-        // Las unidades a rango SIEMPRE buscan objetivos, estén paradas o no
         if (isRangedAttack)
         {
             SearchForRangedTarget();
         }
-        else if (!isStopped)
+        else
         {
-            // Las unidades melee solo buscan mientras se mueven
-            SearchForMeleeTarget();
+            // Las unidades melee: si no hay objetivo, moverse y buscar
+            if (targetRook == null)
+            {
+                isStopped = false;
+            }
+            
+            if (!isStopped)
+            {
+                SearchForMeleeTarget();
+            }
         }
         
         // ============ MOVIMIENTO ============
-        // Moverse si no está detenido, O si es unidad a rango con moveWhileAttacking
-        if (!isStopped || (isRangedAttack && moveWhileAttacking && targetRook != null))
+        if (!isStopped)
         {
             transform.position += Vector3.up * movementSpeed * Time.deltaTime;
         }
@@ -88,19 +105,16 @@ public class AvatarController : MonoBehaviour
         // ============ ATAQUE ============
         if (targetRook != null)
         {
-            // Verificar distancia
             float distance = Vector3.Distance(transform.position, targetRook.transform.position);
             
             if (distance > attackRange)
             {
-                // Objetivo fuera de rango
-                Debug.Log($"[{avatarType}] 📏 Objetivo fuera de rango ({distance:F0} > {attackRange})");
+                Debug.Log($"[{avatarType}] 📏 Objetivo fuera de rango");
                 targetRook = null;
                 isStopped = false;
             }
             else
             {
-                // Atacar cuando el cooldown termine
                 attackTimer -= Time.deltaTime;
                 if (attackTimer <= 0)
                 {
@@ -117,42 +131,42 @@ public class AvatarController : MonoBehaviour
     {
         switch (avatarType)
         {
-            case AvatarType.Archer:
+            case AvatarType.Archer: // Avatar Flechador
                 maxHealth = 5;
                 damage = 2;
-                attackCooldown = 2f;
-                movementSpeed = 12.0f;
+                attackCooldown = 10f; // Cada 10 segundos
+                movementSpeed = 8.33f; // 100 píxeles / 12 segundos
                 isRangedAttack = true;
                 attackRange = 2000f;
                 columnTolerance = 30f;
                 moveWhileAttacking = false;
                 break;
                 
-            case AvatarType.ShieldBearer:
+            case AvatarType.ShieldBearer: // Avatar Escudero
                 maxHealth = 10;
                 damage = 3;
-                attackCooldown = 3f;
-                movementSpeed = 10.0f;
+                attackCooldown = 15f; // Cada 15 segundos
+                movementSpeed = 10f; // 100 píxeles / 10 segundos
                 isRangedAttack = true;
                 attackRange = 2000f;
                 columnTolerance = 30f;
                 moveWhileAttacking = false;
                 break;
                 
-            case AvatarType.Lumberjack:
+            case AvatarType.Lumberjack: // Avatar Leñador
                 maxHealth = 20;
                 damage = 9;
-                attackCooldown = 1.5f;
-                movementSpeed = 13.0f;
+                attackCooldown = 5f; // Cada 5 segundos (si hay torre enfrente)
+                movementSpeed = 7.69f; // 100 píxeles / 13 segundos
                 isRangedAttack = false;
-                attackRange = 60f; // Rango corto para melee
+                attackRange = 60f;
                 break;
                 
-            case AvatarType.Cannibal:
+            case AvatarType.Cannibal: // Avatar Caníbal
                 maxHealth = 25;
                 damage = 12;
-                attackCooldown = 1f;
-                movementSpeed = 14.0f;
+                attackCooldown = 3f; // Cada 3 segundos (si hay torre enfrente)
+                movementSpeed = 7.14f; // 100 píxeles / 14 segundos
                 isRangedAttack = false;
                 attackRange = 60f;
                 break;
@@ -261,26 +275,69 @@ public class AvatarController : MonoBehaviour
 
     void SetupHealthBar()
     {
-        if (healthBar == null) return;
+        if (healthBarPrefab == null) 
+        {
+            Debug.LogWarning($"[{avatarType}] No hay healthBarPrefab asignado");
+            return;
+        }
         
-        healthBar.minValue = 0;
-        healthBar.maxValue = maxHealth;
-        healthBar.value = currentHealth;
-        healthBar.wholeNumbers = true;
-        healthBar.gameObject.SetActive(true);
+        // Instanciar la barra de vida como hijo del mismo Canvas que el avatar
+        Canvas parentCanvas = GetComponentInParent<Canvas>();
+        if (parentCanvas != null)
+        {
+            healthBarInstance = Instantiate(healthBarPrefab, parentCanvas.transform);
+        }
+        else
+        {
+            healthBarInstance = Instantiate(healthBarPrefab);
+        }
+        
+        // Asegurar que la escala sea correcta (el prefab tiene escala 0)
+        healthBarInstance.transform.localScale = Vector3.one;
+        
+        // Buscar la imagen "Fill" en los hijos
+        Transform fillTransform = healthBarInstance.transform.Find("AvatarHealthBar/Fill Area/Fill");
+        if (fillTransform != null)
+        {
+            healthBarFill = fillTransform.GetComponent<Image>();
+        }
+        
+        // Si no lo encontramos con el path exacto, buscar por nombre
+        if (healthBarFill == null)
+        {
+            Image[] allImages = healthBarInstance.GetComponentsInChildren<Image>();
+            foreach (Image img in allImages)
+            {
+                if (img.gameObject.name == "Fill")
+                {
+                    healthBarFill = img;
+                    break;
+                }
+            }
+        }
+        
+        if (healthBarFill != null)
+        {
+            // Configurar la imagen para usar Fill
+            healthBarFill.type = Image.Type.Filled;
+            healthBarFill.fillMethod = Image.FillMethod.Horizontal;
+            healthBarFill.fillOrigin = 0; // Izquierda a derecha
+            healthBarFill.fillAmount = 1f; // 100% al inicio
+            
+            Debug.Log($"[{avatarType}] ✅ Barra de vida configurada con Image.fillAmount");
+        }
+        else
+        {
+            Debug.LogError($"[{avatarType}] ❌ No se encontró Image 'Fill' en el prefab");
+        }
     }
 
     void UpdateHealthBarPosition()
     {
-        if (healthBar == null || Camera.main == null) return;
+        if (healthBarInstance == null) return;
         
-        Vector3 worldPos = transform.position + healthBarOffset;
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
-        
-        if (screenPos.z > 0)
-        {
-            healthBar.transform.position = screenPos;
-        }
+        // La barra de vida sigue la posición del avatar con un offset
+        healthBarInstance.transform.position = transform.position + healthBarOffset;
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
@@ -373,9 +430,10 @@ public class AvatarController : MonoBehaviour
     {
         currentHealth -= damageAmount;
         
-        if (healthBar != null)
+        // Actualizar barra de vida usando fillAmount
+        if (healthBarFill != null)
         {
-            healthBar.value = currentHealth;
+            healthBarFill.fillAmount = (float)currentHealth / (float)maxHealth;
         }
         
         Debug.Log($"[{avatarType}] 💔 -{damageAmount} HP ({currentHealth}/{maxHealth})");
@@ -389,6 +447,12 @@ public class AvatarController : MonoBehaviour
     void Die()
     {
         Debug.Log($"[{avatarType}] 💀 Murió");
+        
+        // Destruir la barra de vida
+        if (healthBarInstance != null)
+        {
+            Destroy(healthBarInstance);
+        }
         
         if (CoinManager.Instance != null)
         {
