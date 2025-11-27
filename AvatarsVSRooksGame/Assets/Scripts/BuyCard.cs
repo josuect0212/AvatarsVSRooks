@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class BuyCard : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler
 {
+    [Header("Rook Type")]
+    public RookType rookType;
+    
     [Header("Referencias")]
     public GameObject rook_Drag;
     public GameObject rook_Game;
@@ -23,6 +26,7 @@ public class BuyCard : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointe
     void Start()
     {
         gameManager = GameManager.instance;
+        SetupCardCost(); // Configurar costo según el tipo de rook
         UpdateCardVisual();
         
         // Mostrar el costo si hay un Text asignado
@@ -45,6 +49,30 @@ public class BuyCard : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointe
         }
     }
     
+    void SetupCardCost()
+    {
+        switch (rookType)
+        {
+            case RookType.Sand:
+                cardCost = 50;
+                break;
+            case RookType.Rock:
+                cardCost = 100;
+                break;
+            case RookType.Fire:
+                cardCost = 150;
+                break;
+            case RookType.Water:
+                cardCost = 150;
+                break;
+        }
+        
+        if (costText != null)
+        {
+            costText.text = cardCost.ToString();
+        }
+    }
+    
     void UpdateCardVisual()
     {
         if (cardImage != null)
@@ -59,7 +87,6 @@ public class BuyCard : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointe
         if (!canAfford)
         {
             Debug.Log($"No tienes suficientes monedas. Necesitas {cardCost}, tienes {CoinManager.Instance?.GetTotalCoins()}");
-            // Aquí puedes agregar un efecto visual de "no puedes comprar"
             StartCoroutine(ShakeCard());
             return;
         }
@@ -67,6 +94,14 @@ public class BuyCard : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointe
         // Crear instancia de arrastre
         rookDragInstance = Instantiate(rook_Drag, canvas.transform);
         rookDragInstance.transform.position = Input.mousePosition;
+        
+        // Configurar el tipo de rook en la instancia
+        var rookController = rookDragInstance.GetComponent<RookController>();
+        if (rookController != null)
+        {
+            rookController.rookType = rookType;
+        }
+        
         rookDragInstance.GetComponent<RookDrag>().card = this;
         gameManager.draggingRook = rookDragInstance;
     }
