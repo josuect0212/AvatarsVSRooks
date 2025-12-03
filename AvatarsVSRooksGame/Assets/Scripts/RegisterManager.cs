@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
@@ -15,17 +14,16 @@ public class RegisterManager : MonoBehaviour
     [SerializeField] private TMP_InputField inputEmail;
     [SerializeField] private TMP_InputField inputUsername;
     [SerializeField] private TMP_InputField inputPassword;
-    [SerializeField] private TMP_Dropdown dropdownRole; // 0 = Jugador, 1 = Administrador
+    [SerializeField] private TMP_Dropdown dropdownRole;
 
-    [Header("UI")]
-    [SerializeField] private TMP_Text statusText; // usa TMP_Text (coherente con LoginManager)
-    [SerializeField] private GameObject buttonRegister; // asigna el GameObject del botón
+    [Header("UI (assign in Inspector)")]
+    [SerializeField] private TMP_Text statusText;
+    [SerializeField] private UnityEngine.UI.Button buttonRegister;
 
-    // Firebase refs
     private FirebaseAuth auth;
     private DatabaseReference dbRef;
 
-    void Start()
+    private void Start()
     {
         statusText.text = "";
         StartCoroutine(WaitForFirebaseInitialization());
@@ -35,18 +33,18 @@ public class RegisterManager : MonoBehaviour
     {
         while (!FirebaseInitializer.IsFirebaseInitialized)
         {
-            Debug.Log("Esperando inicialización de Firebase...");
             yield return null;
         }
 
         auth = FirebaseAuth.DefaultInstance;
 
-        // 🔧 Solución: inicializar la base con URL manual
-        var app = FirebaseApp.DefaultInstance;
-        FirebaseDatabase db = FirebaseDatabase.GetInstance(app, "https://avatarsvsrooks-default-rtdb.firebaseio.com/");
+        FirebaseDatabase db = FirebaseDatabase.GetInstance(
+            FirebaseInitializer.app,
+            "https://avatarsvsrooks-default-rtdb.firebaseio.com/"
+        );
         dbRef = db.RootReference;
 
-        Debug.Log("Firebase inicializado en RegisterManager.");
+        Debug.Log("Firebase inicializado en RegisterManager");
     }
 
     public void OnRegisterButtonPressed()
@@ -55,8 +53,7 @@ public class RegisterManager : MonoBehaviour
 
         if (auth == null)
         {
-            Debug.LogError("Firebase Auth no inicializado.");
-            statusText.text = "Error: Firebase no inicializado.";
+            statusText.text = "Firebase no inicializado";
             return;
         }
 
@@ -64,211 +61,121 @@ public class RegisterManager : MonoBehaviour
         string username = inputUsername.text.Trim();
         string password = inputPassword.text;
 
-        // Validaciones simples
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            statusText.text = "Rellena todos los campos.";
+            statusText.text = "Completa todos los campos.";
             return;
         }
 
         if (password.Length < 6)
         {
-            statusText.text = "La contraseña debe tener al menos 6 caracteres.";
+            statusText.text = "La contraseña debe ser de 6+ caracteres.";
             return;
         }
 
-        // bloquear botón para evitar múltiples clicks
-        var btnComp = buttonRegister.GetComponent<UnityEngine.UI.Button>();
-        if (btnComp != null) btnComp.interactable = false;
-
-        // comprobar username único en DB, luego crear usuario
-        CheckUsernameAndRegister(username, email, password);
+        buttonRegister.interactable = false;
+        CheckUsernameAvailability(username, email, password);
     }
 
-    void CheckUsernameAndRegister(string username, string email, string password)
+    private void CheckUsernameAvailability(string username, string email, string password)
     {
-        // Query: users where username == provided username
-        Query usernameQuery = FirebaseDatabase.DefaultInstance
-            .GetReference("users")
-            .OrderByChild("username")
-            .EqualTo(username);
-
-        usernameQuery.GetValueAsync().ContinueWithOnMainThread(task =>
+        dbRef.Child("users").OrderByChild("username").EqualTo(username).GetValueAsync()
+        .ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
-                Debug.LogError("Error consultando username: " + task.Exception);
-                statusText.text = "Error en la base de datos. Intenta luego.";
-                UnlockRegisterButton();
+                Debug.LogError(task.Exception);
+                statusText.text = "Error en la base de datos.";
+                buttonRegister.interactable = true;
                 return;
             }
 
-            DataSnapshot snapshot = task.Result;
-            if (snapshot.Exists)
+            if (task.Result.Exists)
             {
-                statusText.text = "El usuario ya existe. Elige otro.";
-                UnlockRegisterButton();
+                statusText.text = "Nombre de usuario no disponible.";
+                buttonRegister.interactable = true;
+                return;
             }
-            else
-            {
-                // username libre -> crear en Auth
-                CreateAuthUser(username, email, password);
-            }
+
+            CreateAuthUser(username, email, password);
         });
     }
 
-    void CreateAuthUser(string username, string email, string password)
+    private void CreateAuthUser(string username, string email, string password)
     {
-        auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
+        auth.CreateUserWithEmailAndPasswordAsync(email, password)
+        .ContinueWithOnMainThread(task =>
         {
-            if (task.IsCanceled)
-            {
-                Debug.LogError("Registro cancelado.");
-                statusText.text = "Registro cancelado.";
-                UnlockRegisterButton();
-                return;
-            }
-
             if (task.IsFaulted)
             {
-                Debug.LogError("Error al crear usuario: " + task.Exception);
-                string msg = ParseFirebaseAuthError(task.Exception);
-                statusText.text = msg;
-                UnlockRegisterButton();
+                Debug.Log(task.Exception);
+                statusText.text = TranslateAuthError(task.Exception);
+                buttonRegister.interactable = true;
                 return;
             }
 
-            // 1) Intentar obtener el usuario desde auth.CurrentUser (recomendado)
-            FirebaseUser newUser = auth.CurrentUser;
+            FirebaseUser newUser = task.Result.User;
+            Debug.Log("Usuario creado: " + newUser.UserId);
 
-            // 2) Si es null, intentar usar reflexión para sacar Result / User
-            if (newUser == null)
-            {
-                try
-                {
-                    var taskType = task.GetType();
-                    var resultProp = taskType.GetProperty("Result");
-                    if (resultProp != null)
-                    {
-                        object resultValue = resultProp.GetValue(task);
-                        if (resultValue != null)
-                        {
-                            // Si resultValue tiene propiedad "User" (AuthResult.User)
-                            var userProp = resultValue.GetType().GetProperty("User");
-                            if (userProp != null)
-                            {
-                                object userObj = userProp.GetValue(resultValue);
-                                if (userObj is FirebaseUser fu)
-                                {
-                                    newUser = fu;
-                                }
-                            }
-
-                            // Si resultValue es directamente un FirebaseUser
-                            if (newUser == null && resultValue is FirebaseUser fu2)
-                            {
-                                newUser = fu2;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning("Reflexión: no se pudo extraer usuario desde task.Result: " + ex.Message);
-                }
-            }
-
-            if (newUser == null)
-            {
-                Debug.LogError("No se pudo obtener el usuario creado (newUser == null).");
-                statusText.text = "Error inesperado al crear usuario.";
-                UnlockRegisterButton();
-                return;
-            }
-
-            Debug.LogFormat("Usuario creado: {0} ({1})", newUser.Email, newUser.UserId);
-
-            // guardar datos en Realtime DB
-            SaveAdditionalUserData(newUser, username, email);
+            SaveUserData(newUser.UserId, username, email);
         });
     }
 
-    void SaveAdditionalUserData(FirebaseUser firebaseUser, string username, string email)
+    private void SaveUserData(string uid, string username, string email)
     {
-        string uid = firebaseUser.UserId;
-        string role = dropdownRole != null && dropdownRole.value == 1 ? "admin" : "player";
+        string role = dropdownRole.value == 1 ? "admin" : "player";
         long createdAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        Dictionary<string, object> userData = new Dictionary<string, object>()
+        var userData = new Dictionary<string, object>()
         {
-            {"uid", uid},
-            {"email", email},
-            {"username", username},
-            {"role", role},
-            {"createdAt", createdAt}
+            { "uid", uid },
+            { "email", email },
+            { "username", username },
+            { "role", role },
+            { "createdAt", createdAt }
         };
 
-        dbRef.Child("users").Child(uid).SetValueAsync(userData).ContinueWithOnMainThread(task =>
+        dbRef.Child("users").Child(uid).SetValueAsync(userData)
+        .ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
-                Debug.LogError("Error al guardar datos: " + task.Exception);
-                statusText.text = "Error guardando datos. El usuario fue creado en Auth, pero falló la DB.";
-                UnlockRegisterButton();
+                Debug.LogError(task.Exception);
+                statusText.text = "Error guardando datos.";
+                buttonRegister.interactable = true;
+                return;
             }
-            else
-            {
-                statusText.text = "Registro exitoso.";
-                Debug.Log("Datos del usuario guardados en Realtime DB.");
-                // Opcional: redirigir a Login o a la escena principal
-                // SceneManager.LoadScene("Login");
-            }
+
+            statusText.text = "Registro exitoso 🎉";
+            Debug.Log("Registro completo");
+
+            // Cambia la escena si quieres
+            // SceneManager.LoadScene("Login");
         });
     }
 
-    string ParseFirebaseAuthError(System.AggregateException exception)
+    private string TranslateAuthError(AggregateException ex)
     {
-        string msg = "Error al registrar.";
-        if (exception == null) return msg;
+        string message = "Error al registrar.";
 
-        var flat = exception.Flatten();
-        if (flat.InnerExceptions.Count > 0)
+        var flat = ex.Flatten();
+        if (flat.InnerExceptions.Count == 0) return message;
+
+        var inner = flat.InnerExceptions[0];
+        if (inner is Firebase.FirebaseException fbEx)
         {
-            var inner = flat.InnerExceptions[0];
-            if (inner is FirebaseException fbEx)
+            var errorCode = (AuthError)fbEx.ErrorCode;
+            switch (errorCode)
             {
-                var code = (AuthError)fbEx.ErrorCode;
-                switch (code)
-                {
-                    case AuthError.EmailAlreadyInUse:
-                        msg = "El correo ya está registrado.";
-                        break;
-                    case AuthError.InvalidEmail:
-                        msg = "Correo inválido.";
-                        break;
-                    case AuthError.WeakPassword:
-                        msg = "Contraseña débil.";
-                        break;
-                    default:
-                        msg = fbEx.Message;
-                        break;
-                }
-            }
-            else
-            {
-                msg = inner.Message;
+                case AuthError.EmailAlreadyInUse: message = "Este email ya está registrado."; break;
+                case AuthError.InvalidEmail: message = "Correo inválido."; break;
+                case AuthError.WeakPassword: message = "Contraseña débil."; break;
+                default: message = fbEx.Message; break;
             }
         }
-        return msg;
+        return message;
     }
 
-    void UnlockRegisterButton()
-    {
-        var btn = buttonRegister.GetComponent<UnityEngine.UI.Button>();
-        if (btn != null) btn.interactable = true;
-    }
-
-    // Botón Cancel: vuelve a la escena Login (si la tienes)
     public void OnCancelPressed()
     {
         SceneManager.LoadScene("Login");
