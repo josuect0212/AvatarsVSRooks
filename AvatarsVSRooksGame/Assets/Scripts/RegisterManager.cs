@@ -175,7 +175,7 @@ public class RegisterManager : MonoBehaviour
         }
         return message;
     }
-
+//verificar si el usuario desea cancelar el registro
     public void OnCancelPressed()
     {
         SceneManager.LoadScene("Login");
